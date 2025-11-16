@@ -15,7 +15,7 @@ GALLERY_FOLDER = os.path.join(ASSETS, "gallery")
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Metro 2033 Multimedia")
+        self.title("Metro 2033")
         self.geometry("1024x768")
         self.minsize(800, 600)
         self.protocol("WM_DELETE_WINDOW", self.on_quit)

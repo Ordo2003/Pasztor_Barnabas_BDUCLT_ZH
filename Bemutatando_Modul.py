@@ -24,7 +24,6 @@ class PB_MetroMusic:
         if not self.playing:
             self.play_music()
             return
-
         if not self.paused:
             pygame.mixer.music.pause()
             self.paused = True
@@ -38,4 +37,3 @@ class PB_MetroMusic:
             pygame.mixer.quit()
         except Exception:
             pass
-

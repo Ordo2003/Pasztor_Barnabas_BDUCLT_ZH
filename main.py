@@ -86,6 +86,7 @@ class App(tk.Tk):
             resized = self.bg_original.resize((self.winfo_width(), self.winfo_height()), Image.LANCZOS)
             cropped = resized.crop((x + 1, y + 1.5, x + w, y + h))
             photo = ImageTk.PhotoImage(cropped)
+
             label.config(image=photo, compound="center", bd=0, highlightthickness=0, relief="flat", bg=self["bg"])
             label.image = photo
         except Exception:

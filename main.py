@@ -1,7 +1,7 @@
+import os
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-import os
 from Bemutatando_Modul import PB_MetroMusic
 from Sajat_Modul_PB import pb_resize_image
 
@@ -19,20 +19,25 @@ class App(tk.Tk):
         self.geometry("1024x768")
         self.minsize(800, 600)
         self.protocol("WM_DELETE_WINDOW", self.on_quit)
+
         self.music = PB_MetroMusic(MUSIC_PATH)
         self.music.play_music()
+
         self.container = tk.Frame(self)
         self.container.place(relx=0, rely=0, relwidth=1, relheight=1)
+
         self.bg_label = tk.Label(self.container)
         self.bg_label.place(relx=0, rely=0, relwidth=1, relheight=1)
         self.bg_original = None
         self.bg_photo = None
         self.load_background()
+
         self.frames = {}
         for F in (MainMenu, WorldPage, QuizPage, GalleryPage):
             page = F(parent=self.container, controller=self)
             self.frames[F.__name__] = page
             page.place(relwidth=1, relheight=1)
+
         self.after(100, lambda: self.show_frame("MainMenu"))
         self.bind("<Configure>", self.on_resize)
         self.after_idle(self._initial_paint)
@@ -59,6 +64,7 @@ class App(tk.Tk):
         h = self.winfo_height()
         if w < 10 or h < 10:
             return
+
         img = self.bg_original.resize((w, h), Image.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(img)
         self.bg_label.config(image=self.bg_photo)
@@ -76,6 +82,7 @@ class App(tk.Tk):
             if w < 5 or h < 5:
                 self.after(100, lambda: self._apply_label_bg(label))
                 return
+
             resized = self.bg_original.resize((self.winfo_width(), self.winfo_height()), Image.LANCZOS)
             cropped = resized.crop((x + 1, y + 1.5, x + w, y + h))
             photo = ImageTk.PhotoImage(cropped)
@@ -90,6 +97,7 @@ class App(tk.Tk):
     def show_frame(self, name):
         for frame in self.frames.values():
             frame.place_forget()
+
         self.frames[name].place(relwidth=1, relheight=1)
         self.bg_label.lower()
         self.frames[name].lift()
@@ -113,6 +121,7 @@ class MainMenu(BasePage):
         super().__init__(parent, controller)
         frame = tk.Frame(self, bg="", bd=0)
         frame.place(relx=0.5, rely=0.45, anchor="center")
+
         ttk.Button(frame, text="Metro 2033 világa", command=lambda: controller.show_frame("WorldPage")).pack(fill="x", pady=8)
         ttk.Button(frame, text="Galéria", command=lambda: controller.show_frame("GalleryPage")).pack(fill="x", pady=8)
         ttk.Button(frame, text="Kvíz", command=lambda: controller.show_frame("QuizPage")).pack(fill="x", pady=8)
@@ -124,6 +133,7 @@ class WorldPage(BasePage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         ttk.Button(self, text="Vissza", command=lambda: controller.show_frame("MainMenu")).place(relx=0.02, rely=0.01)
+
         self.texts = ["Az egész világ romokban hever. Az emberiség csaknem teljesen kipusztult. "
             "A félig lerombolt városokat a sugárzás alkalmatlanná tette az életre. "
             "Moszkva szellemvárossá változott, megmérgezte a radioaktív sugárzás, és szörnyek népesítik be. "
@@ -153,9 +163,12 @@ class WorldPage(BasePage):
             "A Metró trilógiája a világ számos országában bestseller lett, és népszerű számítógépes játékok is készültek belőle. "
             "Ez a multimédiás alkalmazás azt a célt szolgálja, hogy az érdeklődők megismerkedhessenek a Metro 2033 világával, "
             "hátha kedvet kapnak ezután a könyvek elolvasásához vagy a játékok végigjátszásához."]
+
         self.index = 0
+
         self.text_label = tk.Label(self, text="", font=("Consolas", 14), fg="white", justify="left", anchor="nw", wraplength=900, bd=0, highlightthickness=0)
         self.text_label.place(relx=0.05, rely=0.34, relwidth=0.9, relheight=0.56)
+
         ttk.Button(self, text="Előző", command=self.prev_page).place(relx=0.3, rely=0.9)
         ttk.Button(self, text="Következő", command=self.next_page).place(relx=0.6, rely=0.9)
         controller.after(300, lambda: controller.set_transparent_label_bg(self.text_label))
@@ -180,14 +193,19 @@ class GalleryPage(BasePage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         ttk.Button(self, text="Vissza", command=lambda: controller.show_frame("MainMenu")).place(relx=0.02, rely=0.01)
+
         self.canvas = tk.Canvas(self, bg="#111", highlightthickness=0)
+
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = tk.Frame(self.canvas, bg="#111")
         self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         self.canvas.place(relx=0.05, rely=0.3, relwidth=0.9, relheight=0.68)
+
         self.scrollbar.place(relx=0.95, rely=0.3, relheight=0.68)
+
         self.thumbnails = []
         self.load_gallery()
 
@@ -195,19 +213,24 @@ class GalleryPage(BasePage):
         if not os.path.exists(GALLERY_FOLDER):
             os.makedirs(GALLERY_FOLDER)
             return
+
         files = [f for f in os.listdir(GALLERY_FOLDER)
             if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+
         for i, file in enumerate(files):
             path = os.path.join(GALLERY_FOLDER, file)
             base_name, _ = os.path.splitext(file)
             txt_path = os.path.join(GALLERY_FOLDER, base_name + ".txt")
+
             img = pb_resize_image(path)
             photo = ImageTk.PhotoImage(img)
+
             frame = tk.Frame(self.scrollable_frame, bg="#111")
             lbl = tk.Label(frame, image=photo, bg="#222", bd=2, relief="ridge", cursor="hand2")
             lbl.image = photo
             lbl.pack(padx=5, pady=(5, 0))
             lbl.bind("<Button-1>", lambda e, p=path, t=txt_path: self.toggle_image(p, t))
+
             caption = ""
             if os.path.exists(txt_path):
                 with open(txt_path, "r", encoding="utf-8") as f:
@@ -220,30 +243,34 @@ class GalleryPage(BasePage):
     def toggle_image(self, path, txt_path):
         if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
             self.overlay_bg.destroy()
+
         if hasattr(self, "overlay_img") and self.overlay_img.winfo_exists():
             self.overlay_img.destroy()
             return
+
         self.overlay_bg = tk.Toplevel(self)
         self.overlay_bg.attributes("-fullscreen", False)
-        self.overlay_bg.geometry(
-            f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_rootx()}+{self.winfo_rooty()}")
+        self.overlay_bg.geometry(f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_rootx()}+{self.winfo_rooty()}")
         self.overlay_bg.overrideredirect(True)
         self.overlay_bg.configure(bg="black")
         self.overlay_bg.attributes("-alpha", 0.0)
+
         self.overlay_img = tk.Toplevel(self)
         self.overlay_img.attributes("-fullscreen", False)
-        self.overlay_img.geometry(
-            f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_rootx()}+{self.winfo_rooty()}")
+        self.overlay_img.geometry(f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_rootx()}+{self.winfo_rooty()}")
         self.overlay_img.overrideredirect(True)
         self.overlay_img.configure(bg="")
+
         img = Image.open(path)
         w, h = self.winfo_width(), self.winfo_height()
         img.thumbnail((w - 150, h - 200))
         photo = ImageTk.PhotoImage(img)
         self.enlarged_photo = photo
+
         lbl = tk.Label(self.overlay_img, image=photo, bg="black", cursor="hand2")
         lbl.image = photo
         lbl.place(relx=0.5, rely=0.5, anchor="center")
+
         for win in (self.overlay_bg, self.overlay_img):
             win.bind("<Button-1>", lambda e: [self.overlay_bg.destroy(), self.overlay_img.destroy()])
         self.overlay_img.lift()
@@ -253,18 +280,24 @@ class QuizPage(BasePage):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         ttk.Button(self, text="Vissza", command=lambda: controller.show_frame("MainMenu")).place(relx=0.02, rely=0.01)
+
         self.questions = [("Hol játszódik a Metro 2033?", ["Moszkva", "London", "New York", "Tokió"], 0),
             ("Ki írta a regényt?", ["Orwell", "Tolkien", "King", "Glukhovsky"], 3),
             ("Ki a főszereplője a könyveknek?", ["Melnyik","Artyom", "Anna", "Ulman"], 1)]
+
         self.index = 0
         self.score = 0
+
         self.q_label = tk.Label(self, text="", font=("Arial", 16), fg="white", bd=0, highlightthickness=0)
         self.q_label.place(relx=0.05, rely=0.30, relwidth=0.9)
+
         controller.after(300, lambda: controller.set_transparent_label_bg(self.q_label))
+
         self.var = tk.IntVar()
         self.options = [ttk.Radiobutton(self, text="", variable=self.var, value=i) for i in range(4)]
         for i, opt in enumerate(self.options):
             opt.place(relx=0.1, rely=0.47 + i * 0.08)
+
         ttk.Button(self, text="Következő", command=self.next_question).place(relx=0.8, rely=0.85)
         self.show_question()
 
